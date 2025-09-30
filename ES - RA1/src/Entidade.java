@@ -1,4 +1,4 @@
-public class Entidade {
+public abstract class Entidade {
     protected int ataque;
     protected int defesa;
     protected int vida;

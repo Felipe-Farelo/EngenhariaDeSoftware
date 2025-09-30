@@ -1,6 +1,7 @@
 public class Heroi extends Entidade{
     private Item maoEsquerda; 
     private Item maoDireita;
+    private Ajudante ajudante;
 
     public Heroi(int ataque, int defesa, int vida) {
         super(ataque, defesa, vida);
@@ -18,6 +19,20 @@ public class Heroi extends Entidade{
     public Item getMaoDireita() { return maoDireita; }
     //endregion
 
+    //region Ajudante
+    public void setAjudante(Ajudante ajudante) {
+        this.ajudante = ajudante;
+    }
+
+    public Ajudante getAjudante() {
+        return ajudante;
+    }
+
+    public void perderAjudante() {
+        this.ajudante = null;
+    }
+    //endregion
+
     public void mostrarStatus() {
         System.out.println("== STATUS DO HERÓI ==");
         System.out.println("Ataque: " + ataque);
@@ -25,6 +40,7 @@ public class Heroi extends Entidade{
         System.out.println("Vida: " + vida);
         System.out.println("Mão Esquerda: " + (maoEsquerda == null ? "vazia" : maoEsquerda.getTipo()));
         System.out.println("Mão Direita: " + (maoDireita == null ? "vazia" : maoDireita.getTipo()));
+        System.out.println("Ajudante: " + (ajudante == null ? "vazia" : ajudante.getNome()));
     }
 
 }

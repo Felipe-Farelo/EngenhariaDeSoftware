@@ -75,7 +75,7 @@ public class Map {
     }
 
     // movimento automático
-    public boolean moveHeroAutomatic() {
+    public boolean moveHeroAutomatic() throws InterruptedException {
         // tenta mover para posições "não visitadas"
         // direita -> baixo -> esquerda -> cima
         int [][] direcoes = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
@@ -88,6 +88,7 @@ public class Map {
                 char destino = matriz[novoX][novoY];
 
                 if (destino == 'e' || destino == 'd' || destino == 'c') {
+                    // -- Itens --
 
                     Item item = null;
                     String tipoItem = "";
@@ -134,7 +135,78 @@ public class Map {
                     }
 
                     
+                } 
+                else if (destino == '^' || destino == '&') {
+                    // -- Ajudantes --
+
+                    Ajudante ajudante = (destino == '^') ? new Duende() : new Anao();
+
+                    System.out.println("VocÊ encontrou um " + ajudante.getNome() + "!");
+                    ajudante.apresentar();
+
+                    Scanner scanner = new Scanner(System.in);
+                    System.out.println("Deseja recrutar este ajudante? (s/n)");
+                    String escolha = scanner.nextLine().trim().toLowerCase();
+
+                    if (escolha.equals("s")) {
+                        if (heroi.getAjudante() != null) {
+                            System.out.println("Você já possui um ajudante (" + heroi.getAjudante().getNome() + "). Deseja trocar? (s/n)");
+                            String troca = scanner.nextLine().trim().toLowerCase();
+                            if (troca.equals("s")) {
+                                heroi.setAjudante(ajudante);
+                                System.out.println("Agora seu ajudante é o " + ajudante.getNome() + "!");
+                            } else {
+                                System.out.println("Você manteve seu ajudante atual.");
+                            }
+                        } else {
+                            heroi.setAjudante(ajudante);
+                            System.out.println("O " + ajudante.getNome() + " agora está ao seu lado!");
+                        }
+                    } else {
+                        System.out.println("Você ignorou o ajudante.");
+                    }
                 }
+                if (destino == '?') {  // Bicho Papão
+                    BichoPapao bicho = new BichoPapao(20, 6, 30);
+                
+                    // aplica efeito do ajudante
+                    if (heroi.getAjudante() != null) {
+                        heroi.getAjudante().aplicaDebuff(heroi, bicho);
+                    }
+                
+                    // inicia a batalha
+                    bicho.batalha(heroi);
+                
+                    // checa se o herói morreu
+                    if (heroi.getVida() <= 0) {
+                        limparTela();
+                        System.out.println("Você morreu! Fim de jogo.");
+                        System.exit(0);
+                    }
+                
+                    // só depois disso move o herói para a posição do monstro
+                    moveHero(novoX, novoY);
+                }
+                
+                else if (destino == '*') {  // Curupira
+                    Curupira curupira = new Curupira(18, 9, 25);
+                
+                    if (heroi.getAjudante() != null) {
+                        heroi.getAjudante().aplicaDebuff(heroi, curupira);
+                    }
+                
+                    curupira.batalha(heroi);
+                
+                    if (heroi.getVida() <= 0) {
+                        limparTela();
+                        System.out.println("Você morreu! Fim de jogo.");
+                        System.exit(0);
+                    }
+                
+                    moveHero(novoX, novoY);
+                }
+                
+                
                 else if (destino == '=') {
                     moveHero(novoX, novoY);
                     limparTela();
