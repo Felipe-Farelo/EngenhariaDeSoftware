@@ -10,7 +10,7 @@ public interface Monstro {
         System.out.flush();
     }
 
-    // Método para mostrar status completo
+    // Mostrar status completo
     default void mostrarStatus(Heroi heroi) {
         System.out.println("== STATUS ATUAL ==");
         System.out.println("Herói -> Vida: " + heroi.getVida() + " | Ataque: " + heroi.getAtaque() + " | Defesa: " + heroi.getDefesa());
@@ -30,20 +30,14 @@ public interface Monstro {
         aplicarHabilidade();
         try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 
-        if (heroi.getAjudante() != null) {
-            heroi.getAjudante().aplicaDebuff(heroi, (Entidade)this);
-            System.out.println("O ajudante " + heroi.getAjudante().getNome() + " aplicou seu efeito e fugiu!");
-            heroi.perderAjudante();
-            try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
-        }
-
         while (heroi.getVida() > 0 && ((Entidade)this).getVida() > 0) {
 
             // Turno do Herói
             limparTela();
             System.out.println("== Turno do Herói ==");
-            if (rand.nextDouble() <= 0.5) {
-                int ataqueBruto = heroi.getAtaque();
+            if (rand.nextDouble() <= 0.7) { // 70% de chance de acertar
+                int ataqueBruto = heroi.getAtaque() - ((Entidade)this).getDefesa();
+                if (ataqueBruto < 0) ataqueBruto = 0;
                 ((Entidade)this).receberDano(ataqueBruto);
                 System.out.println("Você causou " + ataqueBruto + " de dano no " + getClass().getSimpleName());
             } else {
@@ -56,8 +50,9 @@ public interface Monstro {
             // Turno do Monstro
             limparTela();
             System.out.println("== Turno do " + getClass().getSimpleName() + " ==");
-            if (rand.nextDouble() <= 0.5) {
-                int ataqueBruto = ((Entidade)this).getAtaque();
+            if (rand.nextDouble() <= 0.7) { // 70% de chance de acertar
+                int ataqueBruto = ((Entidade)this).getAtaque() - heroi.getDefesa();
+                if (ataqueBruto < 0) ataqueBruto = 0;
                 heroi.receberDano(ataqueBruto);
                 System.out.println(getClass().getSimpleName() + " causou " + ataqueBruto + " de dano em você.");
             } else {
@@ -74,6 +69,7 @@ public interface Monstro {
             System.exit(0);
         } else {
             System.out.println(getClass().getSimpleName() + " foi derrotado!");
+            try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
         }
     }
 }

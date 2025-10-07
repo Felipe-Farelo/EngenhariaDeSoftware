@@ -1,5 +1,5 @@
-public class Heroi extends Entidade{
-    private Item maoEsquerda; 
+public class Heroi extends Entidade {
+    private Item maoEsquerda;
     private Item maoDireita;
     private Ajudante ajudante;
 
@@ -20,17 +20,17 @@ public class Heroi extends Entidade{
     //endregion
 
     //region Ajudante
-    public void setAjudante(Ajudante ajudante) {
-        this.ajudante = ajudante;
-    }
-
     public Ajudante getAjudante() {
         return ajudante;
     }
-
+    
+    public void setAjudante(Ajudante ajudante) {
+        this.ajudante = ajudante;
+    }
+    
     public void perderAjudante() {
         this.ajudante = null;
-    }
+    } 
     //endregion
 
     public void mostrarStatus() {

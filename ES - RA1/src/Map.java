@@ -2,11 +2,11 @@ import java.io.*;
 import java.util.*;
 
 public class Map {
-    private char [][] matriz;
-    private boolean [][] visitado;
+    private char[][] matriz;
+    private boolean[][] visitado;
     private int numLinhas;
     private int numColunas;
-    private int heroX, heroY; // posição do herói no mapa
+    private int heroX, heroY;
 
     private Heroi heroi;
 
@@ -26,7 +26,7 @@ public class Map {
                 for (int j = 0; j < numColunas; j++) {
                     matriz[i][j] = linha.charAt(j);
 
-                    if (matriz[i][j] == '8') { //simbolo do herói
+                    if (matriz[i][j] == '8') { // símbolo do herói
                         heroX = i;
                         heroY = j;
                     }
@@ -40,45 +40,37 @@ public class Map {
     private void limparTela() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
-    }    
+    }
 
-    // Imprimir o mapa
     public void imprimeMapa() {
         limparTela();
-
         for (int i = 0; i < numLinhas; i++) {
             for (int j = 0; j < numColunas; j++) {
-                System.out.print(matriz[i][j]); // sem espaço extra
+                System.out.print(matriz[i][j]);
             }
             System.out.println();
         }
     }
 
-
-    // atualiza a aposição do herói
     public void moveHero(int novoX, int novoY) {
-        matriz[heroX][heroY] = ' '; // limpa a posição antiga
+        matriz[heroX][heroY] = ' ';
         heroX = novoX;
         heroY = novoY;
-        matriz[heroX][heroY] = '8'; // herói na nova posição
+        matriz[heroX][heroY] = '8';
     }
 
-    // verifica se o herói pode se mover para a posição (x, y)
     private boolean podeMover(int x, int y) {
-        if (x < 0 || x >= numLinhas || y < 0 || y >= numColunas) return false; // fora do mapa
-        char destino = matriz[x][y];
-        return destino != '#'; // só pode andar se não for parede
+        if (x < 0 || x >= numLinhas || y < 0 || y >= numColunas) return false;
+        return matriz[x][y] != '#';
     }
 
     private boolean naoVisitado(int x, int y) {
         return !visitado[x][y];
     }
 
-    // movimento automático
+    // Movimento automático do herói
     public boolean moveHeroAutomatic() throws InterruptedException {
-        // tenta mover para posições "não visitadas"
-        // direita -> baixo -> esquerda -> cima
-        int [][] direcoes = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        int[][] direcoes = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
         for (int[] dir : direcoes) {
             int novoX = heroX + dir[0];
@@ -87,9 +79,8 @@ public class Map {
             if (podeMover(novoX, novoY) && naoVisitado(novoX, novoY)) {
                 char destino = matriz[novoX][novoY];
 
+                // --- Itens ---
                 if (destino == 'e' || destino == 'd' || destino == 'c') {
-                    // -- Itens --
-
                     Item item = null;
                     String tipoItem = "";
 
@@ -104,50 +95,41 @@ public class Map {
                         tipoItem = "cura";
                     }
 
-                    // Pergunta ao jogador qual mão
-                    System.out.println("Você encontrou uma " + tipoItem + "... Digite 'd' para mão direita, 'e' para mão esquerda, ou 'n' para ignorar.");
+                    System.out.println("Você encontrou uma " + tipoItem +
+                            "! Digite 'd' para a mão direita, 'e' para a mão esquerda, ou 'n' para ignorar.");
                     Scanner scanner = new Scanner(System.in);
-                    // Lê escolha do jogador
                     String escolha = scanner.nextLine().trim().toLowerCase();
 
                     switch (escolha) {
                         case "d":
-                            // remove item antigo da mão direita
-                            Item antigo = heroi.getMaoDireita();
-                            if (antigo != null) antigo.retiraBonusHeroi(heroi);
-
-                            heroi.setMaoDireita(item);      // equipa novo item
-                            item.aplicaBonusHeroi(heroi);   // aplica efeito
+                            if (heroi.getMaoDireita() != null)
+                                heroi.getMaoDireita().retiraBonusHeroi(heroi);
+                            heroi.setMaoDireita(item);
+                            item.aplicaBonusHeroi(heroi);
                             break;
-
                         case "e":
-                            // remove item antigo da mão esquerda
-                            Item antigoE = heroi.getMaoEsquerda();
-                            if (antigoE != null) antigoE.retiraBonusHeroi(heroi);
-
+                            if (heroi.getMaoEsquerda() != null)
+                                heroi.getMaoEsquerda().retiraBonusHeroi(heroi);
                             heroi.setMaoEsquerda(item);
                             item.aplicaBonusHeroi(heroi);
                             break;
-
-                        case "n":
+                        default:
                             System.out.println("Item ignorado.");
                             break;
                     }
+                }
 
-                    
-                } 
+                // --- Ajudantes ---
                 else if (destino == '^' || destino == '&') {
-                    // -- Ajudantes --
-
                     Ajudante ajudante = (destino == '^') ? new Duende() : new Anao();
-
-                    System.out.println("VocÊ encontrou um " + ajudante.getNome() + "!");
+                
+                    System.out.println("Você encontrou um " + ajudante.getNome() + "!");
                     ajudante.apresentar();
-
+                
                     Scanner scanner = new Scanner(System.in);
                     System.out.println("Deseja recrutar este ajudante? (s/n)");
                     String escolha = scanner.nextLine().trim().toLowerCase();
-
+                
                     if (escolha.equals("s")) {
                         if (heroi.getAjudante() != null) {
                             System.out.println("Você já possui um ajudante (" + heroi.getAjudante().getNome() + "). Deseja trocar? (s/n)");
@@ -166,78 +148,96 @@ public class Map {
                         System.out.println("Você ignorou o ajudante.");
                     }
                 }
-                if (destino == '?') {  // Bicho Papão
+                
+                // --- Monstros ---
+                else if (destino == '?') { // Bicho Papão
                     BichoPapao bicho = new BichoPapao(20, 6, 30);
-                
-                    // aplica efeito do ajudante
+
+                    // Se o herói tiver um ajudante, ele age antes da batalha
                     if (heroi.getAjudante() != null) {
-                        heroi.getAjudante().aplicaDebuff(heroi, bicho);
+                        Ajudante ajudante = heroi.getAjudante();
+
+                        System.out.println("O " + ajudante.getNome() + " apareceu para ajudar!");
+                        ajudante.aplicaDebuff(heroi, bicho);
+                        System.out.println("O " + ajudante.getNome() + " aplicou seu efeito e fugiu!\n");
+
+                        heroi.perderAjudante();
+                        try { Thread.sleep(1500); } catch (InterruptedException e) { e.printStackTrace(); }
                     }
-                
-                    // inicia a batalha
+
+                    // Inicia a batalha
                     bicho.batalha(heroi);
-                
-                    // checa se o herói morreu
+
+                    // Verifica se o herói morreu
                     if (heroi.getVida() <= 0) {
                         limparTela();
                         System.out.println("Você morreu! Fim de jogo.");
                         System.exit(0);
                     }
-                
-                    // só depois disso move o herói para a posição do monstro
+
+                    // Move o herói após vencer a luta
                     moveHero(novoX, novoY);
                 }
-                
-                else if (destino == '*') {  // Curupira
+
+                // --- Curupira ---
+                else if (destino == '*') {
                     Curupira curupira = new Curupira(18, 9, 25);
-                
+
                     if (heroi.getAjudante() != null) {
-                        heroi.getAjudante().aplicaDebuff(heroi, curupira);
+                        Ajudante ajudante = heroi.getAjudante();
+
+                        System.out.println("O " + ajudante.getNome() + " apareceu para ajudar!");
+                        ajudante.aplicaDebuff(heroi, curupira);
+                        System.out.println("O " + ajudante.getNome() + " aplicou seu efeito e fugiu!\n");
+
+                        heroi.perderAjudante();
+                        try { Thread.sleep(1500); } catch (InterruptedException e) { e.printStackTrace(); }
                     }
-                
+
                     curupira.batalha(heroi);
-                
+
                     if (heroi.getVida() <= 0) {
                         limparTela();
                         System.out.println("Você morreu! Fim de jogo.");
                         System.exit(0);
                     }
-                
+
                     moveHero(novoX, novoY);
                 }
-                
-                
+
+
+                // --- Saída ---
                 else if (destino == '=') {
                     moveHero(novoX, novoY);
                     limparTela();
-                    System.out.println("O Herói encontrou a saída");
+                    System.out.println("O Herói encontrou a saída!");
                     heroi.mostrarStatus();
                     System.exit(0);
                 }
+
                 moveHero(novoX, novoY);
                 visitado[novoX][novoY] = true;
                 return true;
             }
         }
 
-        // se não houver posições novas, ele tenta qualquer posição para não ficar preso
+        // tenta qualquer posição já visitada
         for (int[] dir : direcoes) {
             int novoX = heroX + dir[0];
             int novoY = heroY + dir[1];
 
             if (podeMover(novoX, novoY)) {
-                if (matriz[novoX][novoY] == '=') { // saída encontrada!
+                if (matriz[novoX][novoY] == '=') {
                     moveHero(novoX, novoY);
                     limparTela();
                     System.out.println("O Herói encontrou a saída!");
                     System.exit(0);
                 }
                 moveHero(novoX, novoY);
-                return true; // volta para posição já visitada
+                return true;
             }
         }
 
-        return false; // não tem como se mover
+        return false;
     }
-    
 }
