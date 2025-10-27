@@ -20,17 +20,11 @@ public class Heroi extends Entidade {
     //endregion
 
     //region Ajudante
-    public Ajudante getAjudante() {
-        return ajudante;
-    }
+    public Ajudante getAjudante() { return ajudante; }
     
-    public void setAjudante(Ajudante ajudante) {
-        this.ajudante = ajudante;
-    }
+    public void setAjudante(Ajudante ajudante) { this.ajudante = ajudante; }
     
-    public void perderAjudante() {
-        this.ajudante = null;
-    } 
+    public void perderAjudante() { this.ajudante = null; } 
     //endregion
 
     public void mostrarStatus() {

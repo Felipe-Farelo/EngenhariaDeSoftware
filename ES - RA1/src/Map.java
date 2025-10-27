@@ -181,7 +181,7 @@ public class Map {
 
                 // --- Curupira ---
                 else if (destino == '*') {
-                    Curupira curupira = new Curupira(18, 9, 25);
+                    Curupira curupira = new Curupira(18, 2, 25);
 
                     if (heroi.getAjudante() != null) {
                         Ajudante ajudante = heroi.getAjudante();

@@ -22,19 +22,21 @@ public class Duende implements Ajudante {
     @Override
     public void apresentar() {
         System.out.println("Olá, sou um duende! Eu consigo te ajudar em uma batalha, " +
-                "diminuindo " + debuffMonstro + " da defesa do seu inimigo, " +
-                "mas em troca eu diminuo " + debuffHeroi + " da sua defesa.");
+                "diminuindo " + debuffMonstro + " do ataque do seu inimigo, " +
+                "mas em troca eu diminuo " + debuffHeroi + " do seu ataque.");
     }
 
     @Override
     public void aplicaDebuff(Heroi heroi, Entidade monstro) {
-        monstro.setDefesa(monstro.getDefesa() - debuffMonstro);
-        if (monstro.getDefesa() < 0) monstro.setDefesa(0);
+        // reduz ataque do monstro
+        monstro.setAtaque(monstro.getAtaque() - debuffMonstro);
+        if (monstro.getAtaque() < 0) monstro.setAtaque(0);
 
-        heroi.setDefesa(heroi.getDefesa() - debuffHeroi);
-        if (heroi.getDefesa() < 0) heroi.setDefesa(0);
+        // reduz ataque do herói
+        heroi.setAtaque(heroi.getAtaque() - debuffHeroi);
+        if (heroi.getAtaque() < 0) heroi.setAtaque(0);
 
-        System.out.println("O Duende reduziu a defesa do monstro em " + debuffMonstro +
-                ", mas sua defesa caiu em " + debuffHeroi + ".");
+        System.out.println("O Duende reduziu ataque do monstro em " + debuffMonstro +
+                ", mas seu ataque caiu em " + debuffHeroi + ".");
     }
 }

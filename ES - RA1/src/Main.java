@@ -1,6 +1,6 @@
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Heroi heroi = new Heroi(10, 5, 50);
+        Heroi heroi = new Heroi(5, 2, 50);
         Map mapa = new Map("Mapa.txt" , 17, 21, heroi);
 
         mapa.imprimeMapa();
