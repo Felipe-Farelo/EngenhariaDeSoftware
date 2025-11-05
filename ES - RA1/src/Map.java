@@ -10,12 +10,24 @@ public class Map {
 
     private Heroi heroi;
 
-    public Map(String nomeArq, int linhas, int colunas, Heroi heroi) {
+    private FabricaMonstro fabricaMonstro;
+    private FabricaAjudante fabricaAjudante;
+    private FabricaItem fabricaItem;
+
+    public Map(String nomeArq, int linhas, int colunas, Heroi heroi,
+               FabricaMonstro fabricaMonstro,
+               FabricaAjudante fabricaAjudante,
+               FabricaItem fabricaItem) {
         this.numLinhas = linhas;
         this.numColunas = colunas;
         this.matriz = new char[linhas][colunas];
         this.visitado = new boolean[linhas][colunas];
         this.heroi = heroi;
+
+        this.fabricaMonstro = fabricaMonstro;
+        this.fabricaAjudante = fabricaAjudante;
+        this.fabricaItem = fabricaItem;
+
         carregarMapa(nomeArq);
     }
 
@@ -44,13 +56,19 @@ public class Map {
 
     public void imprimeMapa() {
         limparTela();
+    
         for (int i = 0; i < numLinhas; i++) {
             for (int j = 0; j < numColunas; j++) {
-                System.out.print(matriz[i][j]);
+                System.out.print(matriz[i][j] + " ");
             }
             System.out.println();
         }
+    
+        System.out.println("\n------------------------------");
+        heroi.mostrarStatus();
+        System.out.println("------------------------------\n");
     }
+    
 
     public void moveHero(int novoX, int novoY) {
         matriz[heroX][heroY] = ' ';
@@ -81,8 +99,8 @@ public class Map {
 
                 // --- Itens ---
                 if (destino == 'e' || destino == 'd' || destino == 'c') {
-                    Item item = null;
-                    String tipoItem = "";
+                    Item item = fabricaItem.criarItem(destino);
+                    String tipoItem = (item != null) ? item.getTipo() : "item";
 
                     if (destino == 'e') {
                         item = new Espada();
@@ -121,10 +139,12 @@ public class Map {
 
                 // --- Ajudantes ---
                 else if (destino == '^' || destino == '&') {
-                    Ajudante ajudante = (destino == '^') ? new Duende() : new Anao();
-                
-                    System.out.println("Você encontrou um " + ajudante.getNome() + "!");
-                    ajudante.apresentar();
+                    Ajudante ajudante = fabricaAjudante.criarAjudante(destino);
+                    if (ajudante == null) {
+                        System.out.println("Erro: ajudante desconhecido");
+                    } else {
+                        System.out.println("Você encontrou um " + ajudante.getNome() + "!");
+                        ajudante.apresentar();                
                 
                     Scanner scanner = new Scanner(System.in);
                     System.out.println("Deseja recrutar este ajudante? (s/n)");
@@ -144,40 +164,31 @@ public class Map {
                             heroi.setAjudante(ajudante);
                             System.out.println("O " + ajudante.getNome() + " agora está ao seu lado!");
                         }
-                    } else {
-                        System.out.println("Você ignorou o ajudante.");
+                    }   else {
+                            System.out.println("Você ignorou o ajudante.");
+                        }
                     }
                 }
                 
                 // --- Monstros ---
-                else if (destino == '?') { // Bicho Papão
-                    BichoPapao bicho = new BichoPapao(20, 6, 30);
-
-                    // Se o herói tiver um ajudante, ele age antes da batalha
-                    if (heroi.getAjudante() != null) {
-                        Ajudante ajudante = heroi.getAjudante();
-
-                        System.out.println("O " + ajudante.getNome() + " apareceu para ajudar!");
-                        ajudante.aplicaDebuff(heroi, bicho);
-                        System.out.println("O " + ajudante.getNome() + " aplicou seu efeito e fugiu!\n");
-
-                        heroi.perderAjudante();
-                        try { Thread.sleep(1500); } catch (InterruptedException e) { e.printStackTrace(); }
+                else if (destino == '?' || destino == '*') {
+                    Monstro monstro = fabricaMonstro.criarMonstro(destino);
+                    if (monstro == null) {
+                        System.out.println("Erro: monstro desconhecido");
+                    } else {
+                        if (heroi.getAjudante() != null) {
+                            System.out.println("O " + heroi.getAjudante().getNome() + " apareceu para ajudar!");
+                            heroi.getAjudante().aplicaDebuff(heroi, (Entidade) monstro);
+                            System.out.println("O " + heroi.getAjudante().getNome() + " aplicou seu efeito e fugiu!\n");
+                            heroi.perderAjudante();
+                            Thread.sleep(1500);
+                        }
+                        monstro.batalha(heroi);
+                        if (heroi.getVida() <= 0) { limparTela(); System.out.println("Você morreu!"); System.exit(0); }
+                        moveHero(novoX, novoY);
                     }
-
-                    // Inicia a batalha
-                    bicho.batalha(heroi);
-
-                    // Verifica se o herói morreu
-                    if (heroi.getVida() <= 0) {
-                        limparTela();
-                        System.out.println("Você morreu! Fim de jogo.");
-                        System.exit(0);
-                    }
-
-                    // Move o herói após vencer a luta
-                    moveHero(novoX, novoY);
                 }
+
 
                 // --- Curupira ---
                 else if (destino == '*') {

@@ -36,10 +36,10 @@ public interface Monstro {
             limparTela();
             System.out.println("== Turno do Herói ==");
             if (rand.nextDouble() <= 0.7) { // 70% de chance de acertar
-                int ataqueBruto = heroi.getAtaque() - ((Entidade)this).getDefesa();
-                if (ataqueBruto < 0) ataqueBruto = 0;
+                int ataqueBruto = heroi.getAtaque();
+                System.out.println("Você atacou com força total de " + ataqueBruto + "!");
                 ((Entidade)this).receberDano(ataqueBruto);
-                System.out.println("Você causou " + ataqueBruto + " de dano no " + getClass().getSimpleName());
+
             } else {
                 System.out.println("Você errou o ataque!");
             }

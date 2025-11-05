@@ -27,12 +27,17 @@ public abstract class Entidade {
     public void setVida(int vida) { this.vida = vida; }
     //endregion
 
-    public void receberDano(int dano) {
-        int danoFinal = dano - defesa;
-
-        if (danoFinal < 0) danoFinal = 0;
-        vida -= danoFinal;
-        if (vida < 0) vida = 0;
+    public void receberDano(int ataqueRecebido) {
+        int danoFinal = ataqueRecebido - this.defesa;
+    
+        if (danoFinal < 0) {
+            danoFinal = 0; // o dano nunca pode ser negativo
+        }
+    
+        this.vida -= danoFinal;
+    
+        System.out.println(getClass().getSimpleName() + " recebeu " + danoFinal + " de dano!");
     }
+    
 
 }
