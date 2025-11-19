@@ -4,6 +4,7 @@ public class Anao implements Ajudante {
     private final int debuffHeroi = 2;
     private final int debuffMonstro = 6;
 
+    // retorna o nome do ajudante
     @Override
     public String getNome() {
         return nome;
@@ -19,6 +20,7 @@ public class Anao implements Ajudante {
         return debuffMonstro;
     }
 
+    // mensagem descrevendo os efeitos
     @Override
     public void apresentar() {
         System.out.println("Olá, sou um anão! Eu consigo te ajudar em uma batalha, " +

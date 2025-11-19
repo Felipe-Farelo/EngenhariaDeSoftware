@@ -19,6 +19,7 @@ public class Duende implements Ajudante {
         return debuffMonstro;
     }
 
+    // descrição do ajudante Duende
     @Override
     public void apresentar() {
         System.out.println("Olá, sou um duende! Eu consigo te ajudar em uma batalha, " +
@@ -26,6 +27,7 @@ public class Duende implements Ajudante {
                 "mas em troca eu diminuo " + debuffHeroi + " do seu ataque.");
     }
 
+    // aplica debuff diminuindo o ataque do monstro e do herói
     @Override
     public void aplicaDebuff(Heroi heroi, Entidade monstro) {
         // reduz ataque do monstro

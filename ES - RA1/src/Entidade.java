@@ -9,6 +9,8 @@ public abstract class Entidade {
         this.vida = vida;
     }
 
+    // atributos básicos
+
     //region Ataque
     public int getAtaque() { return ataque; }
 

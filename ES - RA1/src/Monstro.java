@@ -2,6 +2,10 @@ import java.util.Random;
 
 public interface Monstro {
 
+    int getAtaque();
+    int getDefesa();
+    int getVida();
+
     void aplicarHabilidade();  // habilidade especial do monstro
     String getDescricao();     // descrição do monstro
 
@@ -72,4 +76,5 @@ public interface Monstro {
             try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
         }
     }
+
 }

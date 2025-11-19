@@ -37,7 +37,6 @@ public class Map {
                 String linha = br.readLine();
                 for (int j = 0; j < numColunas; j++) {
                     matriz[i][j] = linha.charAt(j);
-
                     if (matriz[i][j] == '8') { // símbolo do herói
                         heroX = i;
                         heroY = j;
@@ -56,19 +55,16 @@ public class Map {
 
     public void imprimeMapa() {
         limparTela();
-    
         for (int i = 0; i < numLinhas; i++) {
             for (int j = 0; j < numColunas; j++) {
                 System.out.print(matriz[i][j] + " ");
             }
             System.out.println();
         }
-    
         System.out.println("\n------------------------------");
         heroi.mostrarStatus();
         System.out.println("------------------------------\n");
     }
-    
 
     public void moveHero(int novoX, int novoY) {
         matriz[heroX][heroY] = ' ';
@@ -85,8 +81,51 @@ public class Map {
     private boolean naoVisitado(int x, int y) {
         return !visitado[x][y];
     }
+    
+    private void tratarItemSubstituido(Heroi heroi, Item itemAntigo) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Você já tem um item nessa mão: " + itemAntigo.getTipo());
+        System.out.println("Deseja guardar na mochila (M) ou descartar (D)?");
 
-    // Movimento automático do herói
+        char escolha = scanner.next().toUpperCase().charAt(0);
+
+        if (escolha == 'M') {
+
+            ProxyItem proxyItemAntigo = new ProxyItem(itemAntigo);
+
+            proxyItemAntigo.registrarGuardado();
+
+            heroi.getProxyMochila().adicionar(proxyItemAntigo);
+
+            System.out.println(itemAntigo.getTipo() + " foi guardado na mochila.");
+
+        } else {
+            System.out.println(itemAntigo.getTipo() + " foi descartado.");
+        }
+    }
+
+    private void equiparItemNaMao(Heroi heroi, Item novoItem, String mao) {
+
+        Item itemAtual;
+
+        if (mao.equals("E")) {
+            itemAtual = heroi.getMaoEsquerda();
+        } else {
+            itemAtual = heroi.getMaoDireita();
+        }
+
+        if (itemAtual != null) {
+            tratarItemSubstituido(heroi, itemAtual);
+        }
+
+        if (mao.equals("E")) {
+            heroi.setMaoEsquerda(novoItem);
+        } else {
+            heroi.setMaoDireita(novoItem);
+        }
+    }
+
+    // movimento automático do herói
     public boolean moveHeroAutomatic() throws InterruptedException {
         int[][] direcoes = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
@@ -96,57 +135,75 @@ public class Map {
 
             if (podeMover(novoX, novoY) && naoVisitado(novoX, novoY)) {
                 char destino = matriz[novoX][novoY];
+                Scanner scanner = new Scanner(System.in);
 
                 // --- Itens ---
                 if (destino == 'e' || destino == 'd' || destino == 'c') {
-                    Item item = fabricaItem.criarItem(destino);
-                    String tipoItem = (item != null) ? item.getTipo() : "item";
 
-                    if (destino == 'e') {
-                        item = new Espada();
-                        tipoItem = "espada";
-                    } else if (destino == 'd') {
-                        item = new Escudo();
-                        tipoItem = "escudo";
-                    } else if (destino == 'c') {
-                        item = new Cura();
-                        tipoItem = "cura";
-                    }
+                    Item itemReal = fabricaItem.criarItem(destino);
+                    ProxyItem item = new ProxyItem(itemReal);
 
-                    System.out.println("Você encontrou uma " + tipoItem +
-                            "! Digite 'd' para a mão direita, 'e' para a mão esquerda, ou 'n' para ignorar.");
-                    Scanner scanner = new Scanner(System.in);
-                    String escolha = scanner.nextLine().trim().toLowerCase();
+                    item.registrarEncontrado();
+
+                    System.out.println("Você encontrou uma " + item.getTipo());
+                    System.out.println("(E)quipar esquerda");
+                    System.out.println("(D)quipar direita");
+                    System.out.println("(M)ochila - guardar");
+                    System.out.println("(N)ão pegar");
+
+                    char escolha = scanner.next().toUpperCase().charAt(0);
 
                     switch (escolha) {
-                        case "d":
-                            if (heroi.getMaoDireita() != null)
-                                heroi.getMaoDireita().retiraBonusHeroi(heroi);
-                            heroi.setMaoDireita(item);
-                            item.aplicaBonusHeroi(heroi);
-                            break;
-                        case "e":
+                        case 'E':
                             if (heroi.getMaoEsquerda() != null)
                                 heroi.getMaoEsquerda().retiraBonusHeroi(heroi);
-                            heroi.setMaoEsquerda(item);
+
+                            equiparItemNaMao(heroi, item, "E");
                             item.aplicaBonusHeroi(heroi);
+                            item.registrarEquipado("esquerda");
+                            System.out.println("Equipado na mão esquerda.");
                             break;
-                        default:
-                            System.out.println("Item ignorado.");
+
+                        case 'D':
+                            if (heroi.getMaoDireita() != null)
+                                heroi.getMaoDireita().retiraBonusHeroi(heroi);
+
+                            equiparItemNaMao(heroi, item, "D");
+                            item.aplicaBonusHeroi(heroi);
+                            item.registrarEquipado("direita");
+                            System.out.println("Equipado na mão direita.");
+                            break;
+
+                        case 'M':
+                            heroi.getProxyMochila().adicionar(item);
+                            item.registrarGuardado();
+                            System.out.println("Abrir mochila? (S/N)");
+
+                            char abrir = scanner.next().toUpperCase().charAt(0);
+
+                            if (abrir == 'S')
+                                heroi.getProxyMochila().abrirMenu(heroi);
+
+                            break;
+
+                        case 'N':
+                            item.registrarIgnorado();
+                            System.out.println("Você deixou o item para trás.");
                             break;
                     }
                 }
 
+
                 // --- Ajudantes ---
                 else if (destino == '^' || destino == '&') {
-                    Ajudante ajudante = fabricaAjudante.criarAjudante(destino);
+                    Ajudante ajudante = new ProxyAjudante(fabricaAjudante.criarAjudante(destino));
                     if (ajudante == null) {
                         System.out.println("Erro: ajudante desconhecido");
                     } else {
                         System.out.println("Você encontrou um " + ajudante.getNome() + "!");
                         ajudante.apresentar();                
-                
-                    Scanner scanner = new Scanner(System.in);
+                        
+                    Scanner scn = new Scanner(System.in);
                     System.out.println("Deseja recrutar este ajudante? (s/n)");
                     String escolha = scanner.nextLine().trim().toLowerCase();
                 
@@ -172,7 +229,7 @@ public class Map {
                 
                 // --- Monstros ---
                 else if (destino == '?' || destino == '*') {
-                    Monstro monstro = fabricaMonstro.criarMonstro(destino);
+                    Monstro monstro = new ProxyMonstro(fabricaMonstro.criarMonstro(destino));
                     if (monstro == null) {
                         System.out.println("Erro: monstro desconhecido");
                     } else {
@@ -184,43 +241,22 @@ public class Map {
                             Thread.sleep(1500);
                         }
                         monstro.batalha(heroi);
+                        if (heroi.getVida() > 0) {
+                            LoggerEvento.registrar("Herói derrotou " + monstro.getDescricao());
+                        } else {
+                            LoggerEvento.registrar("Herói foi derrotado por " + monstro.getDescricao());
+                        }
+
                         if (heroi.getVida() <= 0) { limparTela(); System.out.println("Você morreu!"); System.exit(0); }
                         moveHero(novoX, novoY);
                     }
                 }
-
-
-                // --- Curupira ---
-                else if (destino == '*') {
-                    Curupira curupira = new Curupira(18, 2, 25);
-
-                    if (heroi.getAjudante() != null) {
-                        Ajudante ajudante = heroi.getAjudante();
-
-                        System.out.println("O " + ajudante.getNome() + " apareceu para ajudar!");
-                        ajudante.aplicaDebuff(heroi, curupira);
-                        System.out.println("O " + ajudante.getNome() + " aplicou seu efeito e fugiu!\n");
-
-                        heroi.perderAjudante();
-                        try { Thread.sleep(1500); } catch (InterruptedException e) { e.printStackTrace(); }
-                    }
-
-                    curupira.batalha(heroi);
-
-                    if (heroi.getVida() <= 0) {
-                        limparTela();
-                        System.out.println("Você morreu! Fim de jogo.");
-                        System.exit(0);
-                    }
-
-                    moveHero(novoX, novoY);
-                }
-
-
+                    
                 // --- Saída ---
                 else if (destino == '=') {
                     moveHero(novoX, novoY);
                     limparTela();
+                    LoggerEvento.registrar("Herói encontrou a saída do labirinto!");
                     System.out.println("O Herói encontrou a saída!");
                     heroi.mostrarStatus();
                     System.exit(0);
@@ -238,12 +274,6 @@ public class Map {
             int novoY = heroY + dir[1];
 
             if (podeMover(novoX, novoY)) {
-                if (matriz[novoX][novoY] == '=') {
-                    moveHero(novoX, novoY);
-                    limparTela();
-                    System.out.println("O Herói encontrou a saída!");
-                    System.exit(0);
-                }
                 moveHero(novoX, novoY);
                 return true;
             }
